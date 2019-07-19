@@ -1,27 +1,33 @@
 // app.js
 
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
-var product = require('./routes/product'); // Imports routes for the products
-var app = express();
+const productRouter = require('./routes/product');
 
+const app = express();
 
 // Set up mongoose connection
-var mongoose = require('mongoose');
-var dev_db_url = 'mongodb+srv://event-dev:eventdev@test-dlrty.mongodb.net/test?retryWrites=true&w=majority';
-var mongoDB = process.env.MONGODB_URI || dev_db_url;
+
+const mongoDB = process.env.MONGODB_URI;
+
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
-var db = mongoose.connection;
+
+const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-console.log(db);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use('/products', product);
 
-var port = 1234;
+app.use('/product', productRouter);
 
-app.listen(port, () => {
-    console.log('Server is up and running on port numner ' + port);
+const port = 3001;
+
+db.once('open', function() {
+    console.log('Connected!');
+    app.listen(port, () => {
+        console.log('Server is up and running on port numner ' + port);
+    });
 });
